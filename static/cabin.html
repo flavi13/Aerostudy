@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyFlight · Cabina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0f17; --bg2: #13151f; --bg3: #1a1d2e; --bg4: #1e2235;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.11);
+  --text: #e2dfd6; --muted: #4a4d60; --muted2: #7a7d90;
+  --accent: #5a9fd4; --accent2: #5dc4a0; --warn: #e8a87c;
+  --runway: #22283a; --runway-line: rgba(255,255,255,0.12);
+  --seat-empty: #15171f; --seat-empty-border: #20232e;
+}
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  display: flex; flex-direction: column;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-bottom: 0.5px solid var(--border2);
+  padding: 0 20px;
+  height: 52px;
+  display: flex; align-items: center; gap: 16px;
+}
+.route-display {
+  font-family: 'DM Mono', monospace;
+  font-size: 1rem; font-weight: 500;
+  letter-spacing: 0.06em; color: var(--text);
+}
+.phase-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; padding: 2px 8px;
+  border-radius: 20px; border: 0.5px solid var(--border2);
+  color: var(--muted2); letter-spacing: 0.08em;
+  transition: color 0.5s, border-color 0.5s;
+}
+.phase-pill.active { color: var(--accent2); border-color: rgba(93,196,160,0.3); }
+.timer-wrap { margin-left: auto; text-align: right; }
+.timer-main {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem; font-weight: 500; color: var(--text);
+  letter-spacing: 0.04em; line-height: 1;
+}
+.timer-lbl { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.share-btn {
+  background: var(--bg3); border: 0.5px solid var(--border2);
+  color: var(--muted2); border-radius: 6px;
+  padding: 5px 10px; font-size: 0.72rem;
+  font-family: 'DM Mono', monospace; cursor: pointer;
+  transition: color 0.15s; white-space: nowrap;
+}
+.share-btn:hover { color: var(--text); }
+
+/* ── PROGRESS BAR ── */
+.progress-track {
+  flex-shrink: 0; height: 2px;
+  background: var(--border);
+}
+.progress-fill {
+  height: 100%; background: var(--accent);
+  transition: width 1s linear;
+}
+
+/* ── MAIN ── */
+.main {
+  flex: 1; display: flex; overflow: hidden;
+}
+
+/* ── CABIN VIEW ── */
+.cabin-view {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 20px;
+}
+.cabin-view::-webkit-scrollbar { width: 4px; }
+.cabin-view::-webkit-scrollbar-track { background: transparent; }
+.cabin-view::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* windows strip */
+.windows-strip {
+  display: flex; gap: 10px; margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 0.5px solid var(--border);
+}
+.window-frame {
+  flex: 1; height: 40px; border-radius: 10px;
+  border: 0.5px solid var(--border2);
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.window-sky {
+  width: 100%; height: 100%;
+  background: var(--bg3);
+  transition: background 3s;
+}
+
+/* seat map */
+.fuselage-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem; color: var(--muted);
+  text-align: center; letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.col-headers {
+  display: flex; justify-content: center;
+  gap: 6px; margin-bottom: 6px; padding: 0 4px;
+}
+.col-hdr {
+  width: 36px; text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem; color: var(--muted);
+}
+.col-hdr.aisle { width: 20px; }
+
+.seat-rows { display: flex; flex-direction: column; gap: 5px; }
+.seat-row { display: flex; justify-content: center; align-items: center; gap: 6px; }
+.seat {
+  width: 36px; height: 36px;
+  border-radius: 6px 6px 4px 4px;
+  border: 0.5px solid var(--seat-empty-border);
+  background: var(--seat-empty);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted); cursor: default;
+  transition: background 0.4s, border-color 0.4s;
+  position: relative; flex-shrink: 0;
+}
+.seat.occupied {
+  font-size: 0.8rem; font-weight: 500;
+  color: white;
+}
+.seat.is-me { border-width: 1px; }
+.seat-tooltip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg2); border: 0.5px solid var(--border2);
+  border-radius: 6px; padding: 4px 8px; white-space: nowrap;
+  font-family: 'DM Mono', monospace; font-size: 0.65rem;
+  color: var(--text); pointer-events: none;
+  opacity: 0; transition: opacity 0.15s; z-index: 10;
+}
+.seat:hover .seat-tooltip { opacity: 1; }
+.aisle-gap { width: 20px; flex-shrink: 0; }
+.emergency-exit {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem; color: var(--warn);
+  text-align: right; padding: 2px 4px;
+  letter-spacing: 0.08em;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  flex-shrink: 0; width: 220px;
+  background: var(--bg2);
+  border-left: 0.5px solid var(--border2);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-section {
+  padding: 14px;
+  border-bottom: 0.5px solid var(--border);
+}
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.passenger-card {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.passenger-card:last-child { border-bottom: none; }
+.p-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 500; flex-shrink: 0;
+  color: white;
+}
+.p-info { flex: 1; min-width: 0; }
+.p-name { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-sub { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted2); }
+.p-status { font-size: 0.65rem; font-family: 'DM Mono', monospace; }
+.p-status.studying { color: var(--accent2); }
+.p-status.idle { color: var(--warn); }
+
+/* flight stats */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.stat-box {
+  background: var(--bg3); border-radius: 6px; padding: 8px;
+}
+.stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.95rem; font-weight: 500;
+  color: var(--accent);
+}
+.stat-lbl { font-size: 0.6rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* my controls */
+.controls { padding: 14px; border-bottom: 0.5px solid var(--border); }
+.study-toggle {
+  width: 100%; padding: 9px;
+  border-radius: 8px; border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+  background: var(--accent2); color: #04342C;
+}
+.study-toggle.paused { background: var(--bg3); border: 0.5px solid var(--border2); color: var(--warn); }
+.study-toggle:hover { opacity: 0.88; }
+.study-toggle:active { transform: scale(0.98); }
+
+/* chat */
+.chat-section {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; padding: 14px 14px 0;
+}
+.chat-messages {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column;
+  gap: 4px; padding-bottom: 8px;
+}
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.chat-msg {
+  font-size: 0.75rem; line-height: 1.4; padding: 2px 0;
+}
+.chat-msg.sys { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.65rem; font-style: italic; }
+.chat-msg .msg-name { font-weight: 500; margin-right: 4px; }
+.chat-msg .msg-text { color: var(--muted2); }
+.chat-input-wrap {
+  display: flex; gap: 6px; padding: 10px 0;
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; background: var(--bg3);
+  border: 0.5px solid var(--border2); border-radius: 6px;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem; padding: 6px 10px; outline: none;
+}
+.chat-input:focus { border-color: rgba(90,159,212,0.4); }
+.chat-send {
+  background: var(--bg3); border: 0.5px solid var(--border2);
+  border-radius: 6px; color: var(--muted2);
+  padding: 6px 10px; cursor: pointer; font-size: 0.78rem;
+  transition: color 0.15s;
+}
+.chat-send:hover { color: var(--text); }
+
+/* ── LANDING OVERLAY ── */
+.landing-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(13,15,23,0.95);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 1.5rem;
+  text-align: center; padding: 2rem;
+}
+.landing-overlay.show { display: flex; }
+.landing-plane { font-size: 3rem; animation: land 1s ease-out forwards; }
+@keyframes land {
+  0% { transform: translateX(-60px) translateY(-20px) rotate(-10deg); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+.landing-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2rem; font-weight: 400;
+}
+.landing-sub { color: var(--muted2); font-size: 0.85rem; font-family: 'DM Mono', monospace; }
+.stats-final {
+  display: flex; gap: 20px; margin-top: 0.5rem; flex-wrap: wrap; justify-content: center;
+}
+.sf-box {
+  background: var(--bg2); border: 0.5px solid var(--border2);
+  border-radius: 10px; padding: 1rem 1.5rem; min-width: 120px;
+}
+.sf-val { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 500; color: var(--accent); }
+.sf-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.back-btn {
+  background: var(--accent); color: #042C53;
+  border: none; border-radius: 8px; padding: 10px 24px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  font-weight: 500; cursor: pointer; margin-top: 0.5rem;
+}
+
+/* ── COPY TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--bg2); border: 0.5px solid var(--border2);
+  border-radius: 8px; padding: 8px 16px;
+  font-family: 'DM Mono', monospace; font-size: 0.75rem;
+  color: var(--accent2); z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.toast.show { opacity: 1; pointer-events: auto; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="route-display" id="route-display">···</span>
+  <span class="phase-pill" id="phase-pill">esperando</span>
+  <button class="share-btn" onclick="shareRoom()">Compartir sala</button>
+  <div class="timer-wrap">
+    <div class="timer-main" id="timer">--:--:--</div>
+    <div class="timer-lbl">tiempo restante</div>
+  </div>
+</div>
+
+<div class="progress-track">
+  <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+</div>
+
+<div class="main">
+  <div class="cabin-view">
+    <div class="windows-strip" id="windows-strip"></div>
+
+    <div class="fuselage-label">Vista de cabina</div>
+
+    <div class="col-headers">
+      <div class="col-hdr">A</div>
+      <div class="col-hdr">B</div>
+      <div class="col-hdr">C</div>
+      <div class="col-hdr aisle"></div>
+      <div class="col-hdr">D</div>
+      <div class="col-hdr">E</div>
+      <div class="col-hdr">F</div>
+    </div>
+
+    <div class="seat-rows" id="seat-rows"></div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="section-label">Pasajeros</div>
+      <div id="passengers-list"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Tu vuelo</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-elapsed">0m</div>
+          <div class="stat-lbl">transcurrido</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-study">0m</div>
+          <div class="stat-lbl">estudiando</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="section-label" style="margin-bottom:8px">Mi estado</div>
+      <button class="study-toggle" id="study-toggle" onclick="toggleStudy()">
+        Estudiando
+      </button>
+    </div>
+
+    <div class="chat-section">
+      <div class="section-label">Chat de cabina</div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-wrap">
+        <input class="chat-input" id="chat-input" placeholder="Mensaje..." maxlength="200"
+               onkeydown="if(event.key==='Enter') sendChat()">
+        <button class="chat-send" onclick="sendChat()">→</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="landing-overlay" id="landing-overlay">
+  <div class="landing-plane">✈</div>
+  <div class="landing-title">Hemos aterrizado</div>
+  <div class="landing-sub" id="landing-sub">Sesión completada</div>
+  <div class="stats-final" id="stats-final"></div>
+  <button class="back-btn" onclick="location.href='/'">Volver al inicio</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const params   = new URLSearchParams(location.search);
+const myName   = params.get('name') || 'Pasajero';
+const roomCode = location.pathname.split('/').pop();
+const wsProto  = location.protocol === 'https:' ? 'wss' : 'ws';
+const wsUrl    = `${wsProto}://${location.host}/ws/${roomCode}/${encodeURIComponent(myName)}`;
+
+let ws;
+let isStudying = true;
+let myColor    = '#1a3050';
+let lastState  = null;
+
+function connect() {
+  ws = new WebSocket(wsUrl);
+  ws.onmessage = e => { try { handle(JSON.parse(e.data)); } catch(_) {} };
+  ws.onclose   = () => { setTimeout(connect, 2000); };
+}
+connect();
+
+function handle(data) {
+  if (data.type === 'error') { alert(data.msg); return; }
+  if (data.type !== 'state') return;
+  lastState = data;
+
+  const me = data.passengers.find(p => p.name === myName);
+  if (me) { isStudying = me.studying; myColor = me.color; }
+
+  updateTimer(data.remaining);
+  updateProgress(data.progress_pct);
+  updatePhase(data.phase);
+  updateRoute(data.flight_name);
+  updateSeats(data.passengers);
+  updatePassengers(data.passengers);
+  updateStats(data.elapsed, me ? me.study_seconds : 0);
+  updateToggle();
+  updateChat(data.messages);
+
+  if (data.landed) showLanding(data);
+}
+
+function updateTimer(remaining) {
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
+  document.getElementById('timer').textContent =
+    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function updateProgress(pct) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function updatePhase(phase) {
+  const el = document.getElementById('phase-pill');
+  el.textContent = phase;
+  el.className = 'phase-pill' + (phase === 'crucero' ? ' active' : '');
+}
+
+function updateRoute(name) {
+  const el = document.getElementById('route-display');
+  if (el.textContent !== name) el.textContent = name;
+}
+
+function updateSeats(passengers) {
+  const occupied = {};
+  passengers.forEach(p => { occupied[p.seat] = p; });
+  const rows = document.getElementById('seat-rows');
+  if (!rows.children.length) buildSeatMap();
+
+  document.querySelectorAll('.seat[data-seat]').forEach(el => {
+    const sid = el.dataset.seat;
+    const p   = occupied[sid];
+    if (p) {
+      el.className = 'seat occupied' + (p.name === myName ? ' is-me' : '');
+      el.style.background = p.color;
+      el.style.borderColor = p.color;
+      el.textContent = p.name[0].toUpperCase();
+      let tip = el.querySelector('.seat-tooltip');
+      if (!tip) { tip = document.createElement('div'); tip.className = 'seat-tooltip'; el.appendChild(tip); }
+      tip.textContent = `${p.name} · ${p.studying ? 'estudiando' : 'pausado'}`;
+    } else {
+      el.className = 'seat';
+      el.style.background = '';
+      el.style.borderColor = '';
+      el.textContent = sid;
+      const tip = el.querySelector('.seat-tooltip');
+      if (tip) tip.remove();
+    }
+  });
+}
+
+function buildSeatMap() {
+  const rows = document.getElementById('seat-rows');
+  rows.innerHTML = '';
+  const wins = document.getElementById('windows-strip');
+  wins.innerHTML = '';
+
+  for (let i = 0; i < 6; i++) {
+    const w = document.createElement('div');
+    w.className = 'window-frame';
+    const sky = document.createElement('div');
+    sky.className = 'window-sky';
+    w.appendChild(sky);
+    wins.appendChild(w);
+  }
+
+  for (let r = 1; r <= 18; r++) {
+    if (r === 12) {
+      const exit = document.createElement('div');
+      exit.className = 'emergency-exit';
+      exit.textContent = 'EXIT ←';
+      rows.appendChild(exit);
+    }
+    const row = document.createElement('div');
+    row.className = 'seat-row';
+    ['A','B','C',null,'D','E','F'].forEach(c => {
+      if (!c) { const g = document.createElement('div'); g.className = 'aisle-gap'; row.appendChild(g); return; }
+      const s = document.createElement('div');
+      s.className = 'seat'; s.dataset.seat = `${r}${c}`;
+      s.textContent = `${r}${c}`;
+      row.appendChild(s);
+    });
+    rows.appendChild(row);
+  }
+}
+
+function updatePassengers(passengers) {
+  const list = document.getElementById('passengers-list');
+  list.innerHTML = '';
+  passengers.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'passenger-card';
+    d.innerHTML = `
+      <div class="p-avatar" style="background:${p.color}">${p.name[0].toUpperCase()}</div>
+      <div class="p-info">
+        <div class="p-name">${esc(p.name)}${p.name === myName ? ' <span style="color:var(--muted);font-size:0.65rem">(yo)</span>' : ''}</div>
+        <div class="p-sub">asiento ${p.seat}</div>
+      </div>
+      <div class="p-status ${p.studying ? 'studying' : 'idle'}">${p.studying ? 'estudi.' : 'pausado'}</div>`;
+    list.appendChild(d);
+  });
+}
+
+function updateStats(elapsed, studySec) {
+  document.getElementById('stat-elapsed').textContent = fmtMin(elapsed);
+  document.getElementById('stat-study').textContent   = fmtMin(studySec);
+}
+
+function fmtMin(s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function updateToggle() {
+  const btn = document.getElementById('study-toggle');
+  btn.textContent = isStudying ? 'Estudiando' : 'Pausado — reanudar';
+  btn.className = 'study-toggle' + (isStudying ? '' : ' paused');
+}
+
+let lastMsgCount = 0;
+function updateChat(messages) {
+  const box = document.getElementById('chat-messages');
+  if (messages.length === lastMsgCount) return;
+  lastMsgCount = messages.length;
+  box.innerHTML = '';
+  messages.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'chat-msg' + (m.sys ? ' sys' : '');
+    if (m.sys) {
+      d.textContent = m.text;
+    } else {
+      const isMe = m.name === myName;
+      d.innerHTML = `<span class="msg-name" style="color:${m.color || 'var(--accent)'}">${esc(m.name)}</span><span class="msg-text">${esc(m.text)}</span>`;
+    }
+    box.appendChild(d);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function showLanding(data) {
+  const overlay = document.getElementById('landing-overlay');
+  if (overlay.classList.contains('show')) return;
+  overlay.classList.add('show');
+  document.getElementById('landing-sub').textContent =
+    `${data.flight_name} · sesión completada`;
+  const sf = document.getElementById('stats-final');
+  sf.innerHTML = '';
+  data.passengers.forEach(p => {
+    const box = document.createElement('div');
+    box.className = 'sf-box';
+    box.innerHTML = `<div class="sf-val">${fmtMin(p.study_seconds)}</div><div class="sf-lbl">${esc(p.name)}</div>`;
+    sf.appendChild(box);
+  });
+}
+
+function toggleStudy() {
+  if (ws && ws.readyState === WebSocket.OPEN)
+    ws.send(JSON.stringify({type:'toggle_study'}));
+}
+
+function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({type:'chat', text}));
+  inp.value = '';
+}
+
+function shareRoom() {
+  const url = location.href.replace(/\?.*/, '') + '?name=';
+  const full = location.origin + `/room/${roomCode}`;
+  navigator.clipboard.writeText(full).then(() => showToast('Link copiado · ' + roomCode));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+buildSeatMap();
+</script>
+</body>
+</html>

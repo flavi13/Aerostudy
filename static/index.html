@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyFlight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0d0f17;
+  --bg2: #13151f;
+  --bg3: #1a1d2e;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e2dfd6;
+  --muted: #5a5d70;
+  --accent: #5a9fd4;
+  --accent2: #5dc4a0;
+  --warn: #e8a87c;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.stars {
+  position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+}
+.star {
+  position: absolute;
+  width: 1px; height: 1px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle var(--d, 4s) var(--delay, 0s) ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,100% { opacity: 0; }
+  50% { opacity: var(--op, 0.5); }
+}
+
+.container {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 480px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.logo-plane {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+.logo-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.logo-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+.card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 1rem;
+}
+
+.field { margin-bottom: 1rem; }
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-family: 'DM Mono', monospace;
+}
+.field input, .field select {
+  width: 100%;
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+}
+.field select option { background: var(--bg2); }
+
+.field-row { display: flex; gap: 8px; }
+.field-row .field { flex: 1; margin-bottom: 0; }
+
+.custom-row {
+  display: none;
+  margin-bottom: 1rem;
+}
+.custom-row.visible { display: flex; gap: 8px; align-items: flex-end; }
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary {
+  background: var(--accent);
+  color: #042C53;
+}
+.btn-secondary {
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  color: var(--text);
+}
+.btn:hover { opacity: 0.88; }
+
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 1rem 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-family: 'DM Mono', monospace;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1;
+  height: 0.5px; background: var(--border);
+}
+
+.join-code {
+  display: flex; gap: 8px;
+}
+.join-code input {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-family: 'DM Mono', monospace;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.error-msg {
+  color: #e87c7c;
+  font-size: 0.78rem;
+  font-family: 'DM Mono', monospace;
+  margin-top: 6px;
+  display: none;
+}
+.error-msg.visible { display: block; }
+
+.flight-info-preview {
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  color: var(--accent2);
+  margin-top: 8px;
+  display: none;
+}
+.flight-info-preview.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <div class="logo">
+    <span class="logo-plane">✈</span>
+    <div class="logo-title">StudyFlight</div>
+    <div class="logo-sub">Estudia mientras vuelas</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Crear vuelo</div>
+
+    <div class="field">
+      <label>Tu nombre</label>
+      <input type="text" id="create-name" placeholder="Ej: Carlos" maxlength="20">
+    </div>
+
+    <div class="field">
+      <label>Ruta</label>
+      <select id="flight-select" onchange="onFlightChange()">
+        <option value="MAD-TYO">Madrid → Tokio · 12h</option>
+        <option value="MAD-NYC">Madrid → Nueva York · 7h</option>
+        <option value="BCN-LON">Barcelona → Londres · 2h</option>
+        <option value="MAD-CDG">Madrid → París · 1h 15m</option>
+        <option value="MAD-FCO">Madrid → Roma · 1h 30m</option>
+        <option value="MAD-DXB">Madrid → Dubái · 6h</option>
+        <option value="MAD-SYD">Madrid → Sídney · 19h</option>
+        <option value="CUSTOM">Personalizado...</option>
+      </select>
+    </div>
+
+    <div class="custom-row" id="custom-row">
+      <div class="field" style="margin:0; flex:1">
+        <label>Duración (minutos)</label>
+        <input type="number" id="custom-minutes" value="90" min="5" max="1440">
+      </div>
+    </div>
+
+    <div class="flight-info-preview" id="flight-preview">MAD → TYO · 12h 00m · despegue desde Madrid</div>
+
+    <button class="btn btn-primary" onclick="createRoom()">Crear sala y despegar</button>
+    <div class="error-msg" id="create-error">Escribe tu nombre primero</div>
+  </div>
+
+  <div class="divider">o únete a un vuelo</div>
+
+  <div class="card">
+    <div class="card-title">Unirse a un vuelo</div>
+
+    <div class="field">
+      <label>Tu nombre</label>
+      <input type="text" id="join-name" placeholder="Ej: Aitor" maxlength="20">
+    </div>
+
+    <div class="field">
+      <label>Código de sala</label>
+      <div class="join-code">
+        <input type="text" id="join-code" placeholder="ABCD" maxlength="4">
+        <button class="btn btn-secondary" style="width:auto;padding:10px 20px;" onclick="joinRoom()">Unirse</button>
+      </div>
+    </div>
+    <div class="error-msg" id="join-error">Código o nombre inválido</div>
+  </div>
+</div>
+
+<script>
+const stars = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*5}s;--delay:${Math.random()*6}s;--op:${0.2+Math.random()*0.6}`;
+  stars.appendChild(s);
+}
+
+function onFlightChange() {
+  const v = document.getElementById('flight-select').value;
+  document.getElementById('custom-row').classList.toggle('visible', v === 'CUSTOM');
+  const preview = document.getElementById('flight-preview');
+  const durations = {
+    'MAD-TYO':'12h 00m','MAD-NYC':'7h 00m','BCN-LON':'2h 00m',
+    'MAD-CDG':'1h 15m','MAD-FCO':'1h 30m','MAD-DXB':'6h 00m','MAD-SYD':'19h 00m'
+  };
+  if (v !== 'CUSTOM' && durations[v]) {
+    preview.textContent = v.replace('-',' → ') + ' · ' + durations[v];
+    preview.classList.add('visible');
+  } else {
+    preview.classList.remove('visible');
+  }
+}
+onFlightChange();
+
+async function createRoom() {
+  const name = document.getElementById('create-name').value.trim();
+  const err = document.getElementById('create-error');
+  if (!name) { err.classList.add('visible'); return; }
+  err.classList.remove('visible');
+
+  const flightId = document.getElementById('flight-select').value;
+  const customMin = parseInt(document.getElementById('custom-minutes').value) || 60;
+
+  const res = await fetch('/create', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({flight_id: flightId, custom_minutes: customMin})
+  });
+  const data = await res.json();
+  window.location.href = `/room/${data.code}?name=${encodeURIComponent(name)}`;
+}
+
+async function joinRoom() {
+  const name = document.getElementById('join-name').value.trim();
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  const err = document.getElementById('join-error');
+  if (!name || code.length !== 4) { err.classList.add('visible'); return; }
+  err.classList.remove('visible');
+  window.location.href = `/room/${code}?name=${encodeURIComponent(name)}`;
+}
+
+document.getElementById('join-code').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.activeElement.closest('.card') === document.querySelectorAll('.card')[0]) createRoom();
+    else joinRoom();
+  }
+});
+</script>
+</body>
+</html>

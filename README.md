@@ -1,13 +1,11 @@
-# StudyFlight
+# Aerostudy
 
 A shared study room with an airplane-cabin theme. You and a friend connect, pick a flight (= study session length), and when it lands, the session ends.
 
 ## 4. Launch the app
+OPEN https://aerostudy.onrender.com
 
-**You:** open http://localhost:8000 in your browser
-**Your friend (same WiFi network):** open http://YOUR_IP:8000 (find your local IP with `ipconfig` on Windows or `ifconfig` on Mac/Linux)
-
-If you want to use it across different networks, a free option is [ngrok](https://ngrok.com) → `ngrok http 8000` will give you a public URL.
+- If you want to study with friends, copy the code and send it to them!
 
 ## How to use it
 

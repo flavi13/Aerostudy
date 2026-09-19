@@ -11,7 +11,7 @@ OPEN https://aerostudy.onrender.com
 
 1. You create the room by choosing a flight (the duration = study time)
 2. The app gives you a 4-letter code (e.g. `KBTQ`)
-3. Send the link to your friend: `http://YOUR_IP:8000/room/KBTQ`
+3. Send the link to your friend: ex. "KLPS"
 4. Your friend enters their name and joins
 5. You both appear in the cabin in your seats
 6. The timer counts down — when it hits 0, you've landed

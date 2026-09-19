@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StudyFlight</title>
+<title>Aerostudy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -212,26 +212,26 @@ body {
 <div class="container">
   <div class="logo">
     <span class="logo-plane">✈</span>
-    <div class="logo-title">StudyFlight</div>
-    <div class="logo-sub">Estudia mientras vuelas</div>
+    <div class="logo-title">Aerostudy</div>
+    <div class="logo-sub">Study while flying</div>
   </div>
 
   <div class="card">
-    <div class="card-title">Crear vuelo</div>
+    <div class="card-title">Create Flight</div>
 
     <div class="field">
-      <label>Tu nombre</label>
-      <input type="text" id="create-name" placeholder="Ej: Carlos" maxlength="20">
+      <label>Your name</label>
+      <input type="text" id="create-name" placeholder="e.g.: Carlos" maxlength="20">
     </div>
 
     <div class="field">
       <label>Ruta</label>
       <select id="flight-select" onchange="onFlightChange()">
         <option value="MAD-TYO">Madrid → Tokio · 12h</option>
-        <option value="MAD-NYC">Madrid → Nueva York · 7h</option>
-        <option value="BCN-LON">Barcelona → Londres · 2h</option>
-        <option value="MAD-CDG">Madrid → París · 1h 15m</option>
-        <option value="MAD-FCO">Madrid → Roma · 1h 30m</option>
+        <option value="MAD-NYC">Madrid → New York · 7h</option>
+        <option value="BCN-LON">Barcelona → London · 2h</option>
+        <option value="MAD-CDG">Madrid → Paris · 1h 15m</option>
+        <option value="MAD-FCO">Madrid → Rome · 1h 30m</option>
         <option value="MAD-DXB">Madrid → Dubái · 6h</option>
         <option value="MAD-SYD">Madrid → Sídney · 19h</option>
         <option value="CUSTOM">Personalizado...</option>
@@ -240,35 +240,35 @@ body {
 
     <div class="custom-row" id="custom-row">
       <div class="field" style="margin:0; flex:1">
-        <label>Duración (minutos)</label>
+        <label>Duration (minutes)</label>
         <input type="number" id="custom-minutes" value="90" min="5" max="1440">
       </div>
     </div>
 
-    <div class="flight-info-preview" id="flight-preview">MAD → TYO · 12h 00m · despegue desde Madrid</div>
+    <div class="flight-info-preview" id="flight-preview">MAD → TYO · 12h 00m · take off from Madrid</div>
 
-    <button class="btn btn-primary" onclick="createRoom()">Crear sala y despegar</button>
-    <div class="error-msg" id="create-error">Escribe tu nombre primero</div>
+    <button class="btn btn-primary" onclick="createRoom()">Create Room and Take Off</button>
+    <div class="error-msg" id="create-error">Write your name first</div>
   </div>
 
-  <div class="divider">o únete a un vuelo</div>
+  <div class="divider">or join a flight</div>
 
   <div class="card">
-    <div class="card-title">Unirse a un vuelo</div>
+    <div class="card-title">Join a Flight</div>
 
     <div class="field">
-      <label>Tu nombre</label>
-      <input type="text" id="join-name" placeholder="Ej: Aitor" maxlength="20">
+      <label>Your name</label>
+      <input type="text" id="join-name" placeholder="e.g.: Aitor" maxlength="20">
     </div>
 
     <div class="field">
-      <label>Código de sala</label>
+      <label>Room Code</label>
       <div class="join-code">
         <input type="text" id="join-code" placeholder="ABCD" maxlength="4">
         <button class="btn btn-secondary" style="width:auto;padding:10px 20px;" onclick="joinRoom()">Unirse</button>
       </div>
     </div>
-    <div class="error-msg" id="join-error">Código o nombre inválido</div>
+    <div class="error-msg" id="join-error">Invalid code or name</div>
   </div>
 </div>
 

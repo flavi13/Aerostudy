@@ -12,14 +12,14 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 
 FLIGHTS = {
-    "MAD-TYO": {"name": "Madrid → Tokio",        "duration": 43200, "emoji": "🗼"},
-    "MAD-NYC": {"name": "Madrid → Nueva York",    "duration": 25200, "emoji": "🗽"},
-    "MAD-SYD": {"name": "Madrid → Sídney",        "duration": 68400, "emoji": "🦘"},
-    "BCN-LON": {"name": "Barcelona → Londres",    "duration": 7200,  "emoji": "🎡"},
-    "MAD-CDG": {"name": "Madrid → París",         "duration": 4500,  "emoji": "🗼"},
-    "MAD-FCO": {"name": "Madrid → Roma",          "duration": 5400,  "emoji": "🏛️"},
-    "MAD-DXB": {"name": "Madrid → Dubái",         "duration": 21600, "emoji": "🌆"},
-    "CUSTOM":  {"name": "Vuelo personalizado",    "duration": 3600,  "emoji": "✈️"},
+    "MAD-TYO": {"name": "Madrid → Tokio",         "duration": 43200, "emoji": "🗼"},
+    "MAD-NYC": {"name": "Madrid → New York",      "duration": 25200, "emoji": "🗽"},
+    "MAD-SYD": {"name": "Madrid → Sydney",        "duration": 68400, "emoji": "🦘"},
+    "BCN-LON": {"name": "Barcelona → London",     "duration": 7200,  "emoji": "🎡"},
+    "MAD-CDG": {"name": "Madrid → Paris",         "duration": 4500,  "emoji": "🗼"},
+    "MAD-FCO": {"name": "Madrid → Rome",          "duration": 5400,  "emoji": "🏛️"},
+    "MAD-DXB": {"name": "Madrid → Dubai",         "duration": 21600, "emoji": "🌆"},
+    "CUSTOM":  {"name": "Custom Flight",          "duration": 3600,  "emoji": "✈️"},
 }
 
 SEAT_COLORS = [
@@ -71,15 +71,15 @@ class StudyRoom:
     def phase(self):
         pct = self.elapsed / self.duration
         if pct < 0.05:
-            return "despegue"
+            return "takeoff"
         elif pct < 0.15:
-            return "ascenso"
+            return "ascend"
         elif pct < 0.85:
             return "crucero"
         elif pct < 0.95:
-            return "descenso"
+            return "descend"
         else:
-            return "aterrizaje"
+            return "land"
 
     def next_color(self):
         c = SEAT_COLORS[self.color_index % len(SEAT_COLORS)]

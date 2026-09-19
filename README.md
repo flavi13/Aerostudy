@@ -1,50 +1,46 @@
 # StudyFlight
 
-Sala de estudio compartida con ambientación de cabina de avión.
-Tú y tu amigo os conectáis, elegís un vuelo (= duración de estudio),
-y cuando aterriza acaba la sesión.
+A shared study room with an airplane-cabin theme. You and a friend connect, pick a flight (= study session length), and when it lands, the session ends.
 
+## 4. Launch the app
 
-### 4. Abre la app
-- Tú: abre http://localhost:8000 en tu navegador
-- Tu amigo (misma red WiFi): abre http://TU_IP:8000
-  (tu IP local la ves con `ipconfig` en Windows o `ifconfig` en Mac/Linux)
+**You:** open http://localhost:8000 in your browser
+**Your friend (same WiFi network):** open http://YOUR_IP:8000 (find your local IP with `ipconfig` on Windows or `ifconfig` on Mac/Linux)
 
-Si queréis usarlo desde redes distintas, una opción gratuita es
-usar `ngrok`: https://ngrok.com → `ngrok http 8000` te da una URL pública.
+If you want to use it across different networks, a free option is [ngrok](https://ngrok.com) → `ngrok http 8000` will give you a public URL.
 
-## Cómo usarlo
+## How to use it
 
-1. Tú creas la sala eligiendo un vuelo (la duración = tiempo de estudio)
-2. La app te da un código de 4 letras (ej: KBTQ)
-3. Le mandas el link a tu amigo: `http://TU_IP:8000/room/KBTQ`
-4. Tu amigo pone su nombre y entra
-5. Ambos aparecéis en la cabina con vuestros asientos
-6. El timer cuenta hacia atrás — cuando llega a 0, hemos aterrizado
-7. Podéis pausar/reanudar con el botón "Estudiando"
-8. Chat de cabina para coordinarse
+1. You create the room by choosing a flight (the duration = study time)
+2. The app gives you a 4-letter code (e.g. `KBTQ`)
+3. Send the link to your friend: `http://YOUR_IP:8000/room/KBTQ`
+4. Your friend enters their name and joins
+5. You both appear in the cabin in your seats
+6. The timer counts down — when it hits 0, you've landed
+7. You can pause/resume with the "Studying" button
+8. Cabin chat is available to coordinate with each other
 
-## Rutas disponibles
+## Available routes
 
-| Ruta | Duración |
-|------|----------|
-| Madrid → París | 1h 15m |
-| Madrid → Roma | 1h 30m |
-| Barcelona → Londres | 2h |
-| Madrid → Nueva York | 7h |
-| Madrid → Tokio | 12h |
-| Madrid → Dubái | 6h |
-| Madrid → Sídney | 19h |
-| Personalizado | lo que quieras |
+| Route | Duration |
+|---|---|
+| Madrid → Paris | 1h 15m |
+| Madrid → Rome | 1h 30m |
+| Barcelona → London | 2h |
+| Madrid → New York | 7h |
+| Madrid → Tokyo | 12h |
+| Madrid → Dubai | 6h |
+| Madrid → Sydney | 19h |
+| Custom | whatever you want |
 
-## Estructura del código
+## Project structure
 
 ```
 study-flight/
-├── server.py          # servidor FastAPI + WebSockets
-├── requirements.txt   # dependencias
+├── server.py          # FastAPI + WebSockets server
+├── requirements.txt   # dependencies
 ├── README.md
 └── static/
-    ├── index.html     # página de inicio (crear/unirse)
-    └── cabin.html     # la cabina en tiempo real
+    ├── index.html     # home page (create/join)
+    └── cabin.html      # the real-time cabin
 ```
